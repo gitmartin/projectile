@@ -38,7 +38,7 @@ ylabel('y')
 %% 
 % Build the model, x and y independently.
 initx = []; inity = []; % arrays of initial x/y data from trajectories
-curvex = []; curvey = []; % polynomial fit parameters
+curvex = []; curvey = []; % polynomial fit parameters. x and y independent.
 for e = 1:length(paths)
     initx(end+1) = paths(e).x(2); % initial x data
     curvex(end+1,:) = paths(e).xfit; % 5 coefficients from x,t fit to e'th trajectory
@@ -46,6 +46,9 @@ for e = 1:length(paths)
     curvey(end+1,:) = paths(e).yfit; % 5 coefficients from y,t fit to e'th trajectory
 end
 initx = initx'; inity = inity'; % transpose
+
+% pf1x is a polynomial model of how the leading coefficient of the
+% polynomial that fits the trajectory varies as a function of initial x.
 pf1x = polyfit(initx,curvex(:,1),4); % degree 4 coefficient
 pf2x = polyfit(initx,curvex(:,2),4); % degree 3
 pf3x = polyfit(initx,curvex(:,3),4); % degree 2
@@ -58,9 +61,13 @@ pf3y = polyfit(inity,curvey(:,3),4);
 pf4y = polyfit(inity,curvey(:,4),4);
 pf5y = polyfit(inity,curvey(:,5),4); 
 
+% fitpx is a polynomial model the predicted x trajectory (ie x(t)) 
+% as a function of initial x.
 fitpx = [polyval(pf1x,test(1)) polyval(pf2x,test(1)) polyval(pf3x,test(1)) polyval(pf4x,test(1)) polyval(pf5x,test(1))];
 fitpy = [polyval(pf1y,test(2)) polyval(pf2y,test(2)) polyval(pf3y,test(2)) polyval(pf4y,test(2)) polyval(pf5y,test(2))];
 time = 0;
+
+% Check when projectile hits the ground
 while polyval(fitpy,time)>=-0.01
     time = time + .1;
 end
